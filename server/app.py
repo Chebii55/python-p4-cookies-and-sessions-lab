@@ -28,30 +28,17 @@ def index_articles():
 
 @app.route('/articles/<int:id>')
 def show_article(id):
-    article = Article.query.get(id)
-    if article:
-        session['page_views'] = session.get('page_views', 0) + 1
+        session['page_views'] = 0 if not session.get('page_views') else session.get('page_views')
+        session['page_views'] += 1
 
         if session['page_views'] <= 3:
-            serialized_article = article.to_dict()
 
-            response_data = {
-                'article': serialized_article,
-                'session': {
-                    'session_key': 'page_views',
-                    'session_value': session['page_views'],
-                    'session_accessed': session.accessed,
-                },
-                'cookies': {cookie: request.cookies[cookie] for cookie in request.cookies},
-            }
-            response = make_response(jsonify(response_data), 200)
-            response.set_cookie('mouse', 'Cookie')  
+            article = Article.query.filter(Article.id == id).first()
+            article_json = jsonify(article.to_dict())
 
-            return response
-        else:
-            return jsonify({'message': 'Maximum pageview limit reached'}), 401
-    else:
-        return jsonify({'error': 'Article not found'}), 404
+            return make_response(article_json, 200)
+
+        return {'message': 'Maximum pageview limit reached'}, 401
     
 @app.route('/clear')
 def clear():
