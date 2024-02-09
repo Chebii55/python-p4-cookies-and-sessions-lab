@@ -53,5 +53,12 @@ def show_article(id):
     else:
         return jsonify({'error': 'Article not found'}), 404
     
+@app.route('/clear')
+def clear():
+    session['page_views'] = None
+    session['user_id'] = None
+
+    return {}, 204
+    
 if __name__ == '__main__':
     app.run(port=5555)
